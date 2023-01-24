@@ -14,15 +14,13 @@ const Signup = () => {
         setError('')
         try{
             await signUp(email,password);
-            navigate('/Home')
+            navigate('/home')
         } catch (error) {
             setError(error.message)
         }
     }
 
     return (
-    
-        
       <div className="bg-blue-100 flex flex-wrap justify-center  items-center w-full h-screen ">
             <form onSubmit={handleSubmit} className="flex flex-col px-28 py-36 bg-white border h-2/3 rounded-lg w-1/2">
               <input onChange={(e)=> setEmail(e.target.value)}

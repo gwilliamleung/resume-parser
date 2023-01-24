@@ -1,41 +1,57 @@
-import React, { useState } from 'react'
-import { Document, Page } from 'react-pdf';
-
+import React, { useEffect, useState } from 'react'
+import { UserAuth } from '../context/AuthContext';
+import { db } from '../firebase';
+import {arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 const Home = () => {
-  const [file, setFile] = useState(null);
-  const [pdfText, setPdfText] = useState('');
-  const [error, setError] = useState(null);
+  const [fileContent, setFileContent] = useState([]);
+  const [name, setName] = useState('');
+  const [status,setStatus] = useState("");
+  const {user} = UserAuth()
+  const userData = doc(db,'users',`${user?.email}`)
 
-
-  const handleFileChange = e => {
-    setFile(e.target.files[0]);
-    console.log(file)
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      console.log(fileContent)
+      setFileContent(event.target.result.split(/\s+/));
+    };
+    reader.readAsText(file);
   };
 
-  const onLoadError = (error) => {
-    console.error('Error while loading the file:', error);
-    setError(error);
-}
+  const handleSubmit = async () => {
+    if(fileContent.length > 0 && name){
+      try{
+          await updateDoc(userData, {
+            name,
+            resume: fileContent,
+            user: user.uid
+          });
+          setStatus("Submission valid");
+      }catch(error){
+          setStatus("Something went wrong");
+      }
+    }else{
+      setStatus("File or name is empty, please enter")
+    }
+  };
+
+  useEffect(() => {
+    console.log(user)
+    console.log(fileContent)
+    console.log(user.email)
+}, [fileContent])
 
   return (
     <div className="bg-blue-100 flex flex-wrap justify-center items-center h-screen ">
-        <input type="file" onChange={handleFileChange} accept="application/pdf" />
-      {file && (
-        <Document
-          file={file}
-          onLoadSuccess={(pdf) => {
-            pdf.getTextContent().then((textContent) => {
-              setPdfText(textContent.items.map((item) => item.str).join(""));
-            });
-          }}
-          onLoadError={onLoadError}
-        >
-          <Page pageNumber={1} />
-        </Document>
-      )}
-      {pdfText && <div>{pdfText}</div>}
-      {error && <div>Error loading the file: {error.message}</div>}
+        <div className="flex flex-col px-28 py-36 bg-white border h-2/3 rounded-lg w-1/2">
+        <input onChange={(e)=> setName(e.target.value)}
+        className="border px-2" type="text" placeholder="Name"></input>        
+        <input className="border px-2" type="file" onChange={handleFileChange} />
+        <button className="border px-2" onClick={handleSubmit}>Submit name and Resume</button>
+        <p>{status}</p>
+        </div>
     </div>
   )
 }

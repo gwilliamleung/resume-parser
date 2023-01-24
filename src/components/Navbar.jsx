@@ -16,15 +16,18 @@ const Navbar = () => {
     }
   return (
     <div className="flex items-center justify-between p-4 z-[100] w-full absolute">
-        <Link to='/Home'>
+        <Link to='/home'>
             <h1 className="text-blue-600 text-4xl font-bold cursor-pointer">
                 Parse
             </h1>
         </Link>
-    {user?.email ? (        
+    {user?.email ? (       
         <div>
-            <Link to='/Home'>
-                <button className="text-white pr-4">Account</button>
+            <Link to='/search'>
+            <button className="text-white pr-4">Search</button>
+            </Link>
+            <Link to='/home'>
+                <button className="text-white pr-4">Submit Resume</button>
             </Link>
                 <button 
                 onClick={handleLogout}

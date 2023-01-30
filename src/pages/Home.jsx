@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { UserAuth } from '../context/AuthContext';
 import { db } from '../firebase';
-import {arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 const Home = () => {
   const [fileContent, setFileContent] = useState([]);
@@ -14,8 +14,8 @@ const Home = () => {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = (event) => {
-      console.log(fileContent)
-      setFileContent(event.target.result.split(/\s+/));
+      const fileContent = event.target.result;
+      setFileContent(fileContent.replace(/[A-Z]/g, (val) => val.toLowerCase()))
     };
     reader.readAsText(file);
   };
@@ -24,9 +24,10 @@ const Home = () => {
     if(fileContent.length > 0 && name){
       try{
           await updateDoc(userData, {
-            name,
-            resume: fileContent,
-            user: user.uid
+          individualResume: ({
+              username: name, 
+              resume: fileContent,
+          })
           });
           setStatus("Submission valid");
       }catch(error){
